@@ -82,9 +82,63 @@ const App: React.FC = () => {
   }, []);
 
   const startGeolocating = useCallback(() => {
-    // Temporarily disable GPS location, redirect to manual province selection
-    setStatus('PROMPTING_PROVINCE');
-    setError('Tính năng định vị GPS tạm thời không khả dụng. Vui lòng chọn tỉnh/thành phố thủ công.');
+    if (!navigator.geolocation) {
+      setStatus('PROMPTING_PROVINCE');
+      setError('Trình duyệt của bạn không hỗ trợ định vị. Vui lòng chọn tỉnh/thành phố.');
+      return;
+    }
+
+    setStatus('FETCHING_LOCATION');
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          setStatus('FETCHING_TAXIS');
+          // For demo purposes, we'll use Hà Nội as default location
+          // In real implementation, you would reverse geocode the coordinates
+          const provinceId = '1'; // Hà Nội
+
+          // Use static taxi data directly
+          const staticTaxiData: { [key: string]: any[] } = {
+            '1': [ // Hà Nội
+              { id: '1', name: 'Taxi Mai Linh', phone: '024.38616161', image: '/taxi-logos/mai-linh.png' },
+              { id: '2', name: 'Taxi Group', phone: '024.38222222', image: '/taxi-logos/group.png' },
+              { id: '3', name: 'Taxi ABC', phone: '024.38615151', image: '/taxi-logos/abc.png' },
+              { id: '4', name: 'Taxi Thành Công', phone: '024.38353535', image: '/taxi-logos/thanh-cong.png' }
+            ]
+          };
+
+          const provinceData = staticTaxiData[provinceId];
+
+          if (provinceData) {
+            setTaxiData({ locationName: 'Hà Nội', taxis: provinceData });
+            setStatus('SUCCESS');
+          } else {
+            throw new Error('Không tìm thấy dữ liệu cho vị trí này');
+          }
+        } catch (error) {
+          setStatus('ERROR');
+          setError(error instanceof Error ? error.message : 'Lỗi không xác định.');
+        }
+      },
+      (geoError) => {
+        setStatus('PROMPTING_PROVINCE');
+        switch (geoError.code) {
+          case geoError.PERMISSION_DENIED:
+            setError('Bạn đã từ chối quyền truy cập vị trí. Vui lòng chọn thủ công.');
+            break;
+          case geoError.POSITION_UNAVAILABLE:
+            setError('Không thể xác định vị trí của bạn. Vui lòng chọn thủ công.');
+            break;
+          case geoError.TIMEOUT:
+            setError('Yêu cầu vị trí đã hết hạn. Vui lòng chọn thủ công.');
+            break;
+          default:
+            setError('Đã xảy ra lỗi khi lấy vị trí. Vui lòng chọn thủ công.');
+            break;
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+    );
   }, []);
 
   const renderContent = () => {
