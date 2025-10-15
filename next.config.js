@@ -1,13 +1,13 @@
-// Temporarily disable static export to support API routes
+// Enable static export for GitHub Pages
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', // Disabled for API routes compatibility
+  output: 'export',
   trailingSlash: true,
   images: {
     unoptimized: true,
   },
-  // assetPrefix: process.env.NODE_ENV === 'production' ? '/taxi-vietnam/' : '',
-  // basePath: process.env.NODE_ENV === 'production' ? '/taxi-vietnam' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/taxivn/' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '/taxivn' : '',
 }
 
 module.exports = nextConfig

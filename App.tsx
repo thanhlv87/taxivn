@@ -53,20 +53,22 @@ const App: React.FC = () => {
     // Set location name preemptively for the loading message
     setTaxiData({ locationName: province, taxis: [] });
     setError(null);
+
+    // Use static data instead of API for static export
     try {
-        // Use API route instead of geminiService
-        const response = await fetch(`/api/taxi?provinceId=${province}`);
-        const result = await response.json();
+        // Import static taxi data
+        const { taxiData } = await import('./data/taxiData');
+        const provinceData = taxiData[province];
 
-        if (!response.ok) {
-            throw new Error(result.error || 'Không thể tải dữ liệu taxi');
+        if (provinceData) {
+            setTaxiData({ locationName: province, taxis: provinceData });
+            setStatus('SUCCESS');
+        } else {
+            throw new Error('Không tìm thấy dữ liệu cho tỉnh này');
         }
-
-        setTaxiData(result.data);
-        setStatus('SUCCESS');
-    } catch (apiError) {
+    } catch (error) {
         setStatus('ERROR');
-        setError(apiError instanceof Error ? apiError.message : 'Lỗi không xác định từ API.');
+        setError(error instanceof Error ? error.message : 'Lỗi không xác định.');
     }
   }, []);
 
