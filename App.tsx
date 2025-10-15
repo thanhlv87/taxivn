@@ -56,9 +56,18 @@ const App: React.FC = () => {
 
     // Use static data instead of API for static export
     try {
-        // Import static taxi data
-        const { taxiData } = await import('./data/taxiData');
-        const provinceData = taxiData[province];
+        // Use static taxi data directly
+        const staticTaxiData: { [key: string]: any[] } = {
+          '1': [ // Hà Nội
+            { id: '1', name: 'Taxi Mai Linh', phone: '024.38616161', image: '/taxi-logos/mai-linh.png' },
+            { id: '2', name: 'Taxi Group', phone: '024.38222222', image: '/taxi-logos/group.png' },
+            { id: '3', name: 'Taxi ABC', phone: '024.38615151', image: '/taxi-logos/abc.png' },
+            { id: '4', name: 'Taxi Thành Công', phone: '024.38353535', image: '/taxi-logos/thanh-cong.png' }
+          ]
+        };
+
+        const provinceDataResult = staticTaxiData[province];
+        const provinceData = staticTaxiData[province];
 
         if (provinceData) {
             setTaxiData({ locationName: province, taxis: provinceData });
