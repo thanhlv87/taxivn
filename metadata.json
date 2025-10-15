@@ -1,0 +1,5 @@
+{
+  "name": "Taxi Finder Vietnam",
+  "description": "An application that automatically detects your location in Vietnam and lists nearby taxi services with their logos and phone numbers for easy calling.",
+  "requestFramePermissions": []
+}
