@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { fetchTaxisByLocation, fetchTaxisByProvinceName } from './services/geminiService';
+// import { fetchTaxisByLocation, fetchTaxisByProvinceName } from './services/geminiService';
 import { TaxiData, AppStatus } from './types';
 import TaxiCard from './components/TaxiCard';
 import StatusDisplay from './components/StatusDisplay';
@@ -54,8 +54,15 @@ const App: React.FC = () => {
     setTaxiData({ locationName: province, taxis: [] });
     setError(null);
     try {
-        const data = await fetchTaxisByProvinceName(province);
-        setTaxiData(data);
+        // Use API route instead of geminiService
+        const response = await fetch(`/api/taxi?provinceId=${province}`);
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Không thể tải dữ liệu taxi');
+        }
+
+        setTaxiData(result.data);
         setStatus('SUCCESS');
     } catch (apiError) {
         setStatus('ERROR');
@@ -64,45 +71,9 @@ const App: React.FC = () => {
   }, []);
 
   const startGeolocating = useCallback(() => {
-    if (!navigator.geolocation) {
-      setStatus('PROMPTING_PROVINCE');
-      setError('Trình duyệt của bạn không hỗ trợ định vị. Vui lòng chọn tỉnh/thành phố.');
-      return;
-    }
-    
-    setStatus('FETCHING_LOCATION');
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          setStatus('FETCHING_TAXIS');
-          const { latitude, longitude } = position.coords;
-          const data = await fetchTaxisByLocation(latitude, longitude);
-          setTaxiData(data);
-          setStatus('SUCCESS');
-        } catch (apiError) {
-          setStatus('ERROR');
-          setError(apiError instanceof Error ? apiError.message : 'Lỗi không xác định từ API.');
-        }
-      },
-      (geoError) => {
-        setStatus('PROMPTING_PROVINCE');
-        switch (geoError.code) {
-          case geoError.PERMISSION_DENIED:
-            setError('Bạn đã từ chối quyền truy cập vị trí. Vui lòng chọn thủ công.');
-            break;
-          case geoError.POSITION_UNAVAILABLE:
-            setError('Không thể xác định vị trí của bạn. Vui lòng chọn thủ công.');
-            break;
-          case geoError.TIMEOUT:
-            setError('Yêu cầu vị trí đã hết hạn. Vui lòng chọn thủ công.');
-            break;
-          default:
-            setError('Đã xảy ra lỗi khi lấy vị trí. Vui lòng chọn thủ công.');
-            break;
-        }
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
-    );
+    // Temporarily disable GPS location, redirect to manual province selection
+    setStatus('PROMPTING_PROVINCE');
+    setError('Tính năng định vị GPS tạm thời không khả dụng. Vui lòng chọn tỉnh/thành phố thủ công.');
   }, []);
 
   const renderContent = () => {
