@@ -24,7 +24,7 @@ jobs:
       run: npm ci
       
     - name: Build
-      run: npm run build:static
+      run: npm run build
       env:
         NODE_ENV: production
         
@@ -34,7 +34,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: ./out
+        path: ./.next
         
     - name: Deploy to GitHub Pages
       id: deployment
